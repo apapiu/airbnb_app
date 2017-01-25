@@ -29,25 +29,35 @@ import xgboost as xgb
 from keras.models import Sequential
 from keras.layers import Dense, Dropout
 
-os.chdir("/Users/alexpapiu/Documents/Insight/Project/airbnb")
+os.chdir("/Users/alexpapiu/Documents/Insight/airbnb_app/airbnb")
 import airbnb_pipeline
 
 def rmse(y_true, y_pred):
     return(np.sqrt(metrics.mean_squared_error(y_true, y_pred)))
 
 
-os.chdir("/Users/alexpapiu/Documents/Insight/Project/Data")
+
+dbname = 'airbnb_db'
+username = 'alexpapiu'
+
+con = psycopg2.connect(database = dbname, user = username)
+sql_query = """SELECT * FROM small_listings;"""
+train = pd.read_sql_query(sql_query, con, index_col = "id")
+
+
+
+
+os.chdir("/Users/alexpapiu/Documents/Insight/airbnb_app/Data")
 train = pd.read_csv("new-york-city_2016-12-03_data_listings.csv")
+
 
 train = airbnb_pipeline.clean(train)
 
-
-sm_train = train[["price", "room_type", "neighbourhood_cleansed", "accommodates"]]
-
-sm_train
+train.head()
 
 
-#sm_train.head()
+
+#sm_train = train[["price", "room_type", "neighbourhood_cleansed", "accommodates"]]
 sm_train.to_csv("/Users/alexpapiu/Documents/Insight/Project/Data/sm_listings.csv", index = False)
 #train  = train[train["room_type"] == 'Entire home/apt']
 #train.to_csv("/Users/alexpapiu/Documents/Insight/Project/Data/clean_listings.csv")

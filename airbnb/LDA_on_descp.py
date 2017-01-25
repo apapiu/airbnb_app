@@ -8,19 +8,21 @@ from sklearn.pipeline import make_pipeline
 from sklearn.neighbors import NearestNeighbors
 from sklearn.preprocessing import Normalizer, StandardScaler
 
+
+#sql stuff:
+from sqlalchemy import create_engine
+from sqlalchemy_utils import database_exists, create_database
+import psycopg2
 %matplotlib inline
 
-os.chdir("/Users/alexpapiu/Documents/Insight/Project/Data")
-train = pd.read_csv("new-york-city_2016-12-03_data_listings.csv")
 
-train
+dbname = 'airbnb_db'
+username = 'alexpapiu'
+con = psycopg2.connect(database = dbname, user = username)
+train = pd.read_sql_query("SELECT * FROM location_descriptions", con)
 
-train = train.dropna(axis = 0, subset = ["neighborhood_overview"])
+nbd_counts = train["neighbourhood_cleansed"].value_counts()
 
-nbd_counts = train.neighbourhood_cleansed.value_counts()[:100]
-
-nbd_counts
-np.log(nbd_counts)
 
 descp = train[["id", "neighborhood_overview"]]
 descp = descp.drop_duplicates()
@@ -37,6 +39,7 @@ knn = NearestNeighbors(500, metric = "cosine", algorithm = "brute")
 X = descp["neighborhood_overview"]
 X_proj = model.fit_transform(X)
 knn.fit(X_proj)
+
 
 
 #TODO: if brooklyn or manhattan in name then filter only for the places in that burrough:
@@ -56,7 +59,7 @@ def get_nbds(new_descp):
     """
     neighbors = knn.kneighbors(model.transform([new_descp]))
     closest_listings = neighbors[1][0]
-    results = train.iloc[closest_listings][["description", "neighbourhood_cleansed"]]
+    results = train.iloc[closest_listings][["neighbourhood_cleansed"]]
     results["distance"] = neighbors[0][0]
 
     #invert the distance:
@@ -69,17 +72,23 @@ def get_nbds(new_descp):
 
     return nbd_score
 
-nbd_score = get_nbds("dirty trasy crimes")
-nbd_score["weighted_score"].dropna().sort_values().tail(15).plot(kind = "barh")
+def locations_of_best_match(new_descp):
+    neighbors = knn.kneighbors(model.transform([new_descp]))
+    closest_listings = neighbors[1][0]
+    results = train.iloc[closest_listings]
+    return results
+
+def draw_map(results, nr_pts = 300):
+    map_osm = folium.Map(tiles='Cartodb Positron', location = [40.661408, -73.961750])
+    for index, row in results[:nr_pts].iterrows():
+        folium.CircleMarker(location=[row["latitude"], row["longitude"]], radius=row["latitude"], color = "pink").add_to(map_osm)
+
+    return(map_osm)
+
+nbd_score = get_nbds("close to the beach")
+
+nbd_score["weighted_score"].dropna().sort_values().tail(12).plot(kind = "barh")
 
 
-    nbd_score = get_nbds("prospect park tree lined streets")
-nbd_score["weighted_score"].dropna().sort_values().tail(15).plot(kind = "barh")
-
-
-
-import folium
-map_osm = folium.Map(location=[45.5236, -122.6750])
-map_osm.save('osm.html')
-!open .
-map_osm
+nbd_score = get_nbds("prospect park tree lined streets")
+nbd_score["weighted_score"].dropna().sort_values().tail(12).plot(kind = "barh")
