@@ -74,8 +74,9 @@ def clean(train):
 
     return train
 
-
+#~~~~~~~~~~~~~~~~~~~
 #MAPS RELATED STUFF:
+#~~~~~~~~~~~~~~~~~~~
 def get_nbds(new_descp):
     """
     builds a score for each neighborhood given a description as follows:
@@ -102,7 +103,6 @@ def locations_of_best_match(new_descp, knn, model, train):
     results = train.iloc[closest_listings]
     return results
 
-
 def draw_point_map(results, nr_pts = 300):
     map_osm = folium.Map(tiles='Cartodb Positron', location = [40.661408, -73.961750])
     #this is stupidly slow:
@@ -110,7 +110,6 @@ def draw_point_map(results, nr_pts = 300):
         folium.CircleMarker(location=[row["latitude"], row["longitude"]], radius=row["latitude"], color = "pink").add_to(map_osm)
 
     return(map_osm)
-
 
 
 def get_heat_map(descp, knn, model, train):

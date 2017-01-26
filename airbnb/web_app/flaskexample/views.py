@@ -21,8 +21,12 @@ from sqlalchemy_utils import database_exists, create_database
 from bokeh.charts import Histogram
 from bokeh.embed import components
 
+
+home_folder = '/Users/alexpapiu/Documents/Insight/'
 dbname = 'airbnb_db'
 username = 'alexpapiu'
+
+
 con = psycopg2.connect(database = dbname, user = username)
 
 train = pd.read_sql_query("SELECT * FROM location_descriptions", con)
@@ -32,8 +36,7 @@ descp = descp.drop_duplicates()
 
 
 print("loading models")
-model = joblib.load('/Users/alexpapiu/Documents/Insight/airbnb_app/Data/tf_idf_model.pkl')
-
+model = joblib.load(os.path.join(home_folder, 'airbnb_app/Data/tf_idf_model.pkl'))
 knn = NearestNeighbors(500, metric = "cosine", algorithm = "brute")
 X = descp["neighborhood_overview"]
 
