@@ -46,7 +46,7 @@ knn.fit(X_proj)
 new_descp = "cool loft with rooftop views close to times square" #hells kitchen
 new_descp = "urban gritty tree-lined street" #
 new_descp = "hip cute quaint shops hipsters vintage clothing stores"
-new_descp = "close to museums and train luxurious skyline manhattan" #trickier
+ 7new_descp = "close to museums and train luxurious skyline manhattan" #trickier
 new_descp = "gritty urban close to central park and bars" #
 new_descp = "ethnic restaurants gritty close to central park and bars" #
 new_descp = "african american heritage jazz" #
