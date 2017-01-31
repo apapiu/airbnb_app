@@ -31,6 +31,8 @@
 
   <body>
 
+    <!-- {%include 'barplot.html'%} -->
+
     <nav class="navbar navbar-inverse navbar-fixed-top">
       <div class="container">
         <div class="navbar-header">
@@ -57,7 +59,7 @@
 <div class="container">
 
       <div class="starter-template">
-        <h1>Airbnb App!</h1>
+        <h1>BestBnB</h1>
         <p class="lead">Get a fairly priced AirBnb in a neighborhood you'll love.</p>
       </div>
 
@@ -82,6 +84,24 @@
         </div>
 
       </form>
+
+
+            <form  action="/nbd_rec" method="GET">
+              <div class="form-group">
+                <br>
+                <label for="nbd">Describe Some Areas you'd like to live in:</label> <br>
+
+                <!-- <label for="nbd">Get Description:</label> -->
+                <input type="text" id="nbd_descp" name='map_descp' placeholder="eg. hip">
+
+
+              </div>
+
+              <div>
+                <button type="submit" class="btn btn-default btn-lg">See Best Nbds!</button>
+              </div>
+
+            </form>
 
       <br><br>
       <form  action="/nbd" method="GET">

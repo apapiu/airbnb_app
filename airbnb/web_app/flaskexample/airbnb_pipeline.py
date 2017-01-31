@@ -37,13 +37,13 @@ def small_clean(train):
 
 def clean(train):
 
-    columns_to_keep = ["price", "city", "neighbourhood_cleansed", "bedrooms",
-    "is_location_exact",
-    "property_type", "room_type", "name", "summary", "host_identity_verified",
-    "amenities", "latitude", "longitude", "number_of_reviews", "zipcode", "accommodates", "review_scores_location",
-    "minimum_nights", "review_scores_rating"]
+    #columns_to_keep = ["price", "city", "neighbourhood_cleansed", "bedrooms",
+    #"is_location_exact",
+    #"property_type", "room_type", "name", "summary", "host_identity_verified",
+    #"amenities", "latitude", "longitude", "number_of_reviews", "zipcode", "accommodates", "review_scores_location",
+    #"minimum_nights", "review_scores_rating"]
 
-    train = train[columns_to_keep]
+    #train = train[columns_to_keep]
 
     train.loc[:,"zipcode"] = train.zipcode.fillna("Other")
     #these are mostly shared rooms:
@@ -56,7 +56,7 @@ def clean(train):
     train.loc[:,"review_scores_rating"] = train["review_scores_rating"].fillna(train.review_scores_rating.mean())
 
     #use strings?
-    #train["bedrooms"] = train["bedrooms"].astype("str")
+    train["bedrooms"] = train["bedrooms"].astype("str")
 
 
     popular_types = train["property_type"].value_counts().head(6).index.values
@@ -77,7 +77,7 @@ def clean(train):
 #~~~~~~~~~~~~~~~~~~~
 #MAPS RELATED STUFF:
 #~~~~~~~~~~~~~~~~~~~
-def get_nbds(new_descp):
+def get_nbds(new_descp, knn, model, train, nbd_counts):
     """
     builds a score for each neighborhood given a description as follows:
     ass up the distances
@@ -113,7 +113,7 @@ def draw_point_map(results, nr_pts = 300):
 
 
 def get_heat_map(descp, knn, model, train):
-    map_osm = folium.Map(tiles='Cartodb Positron', location = [40.7831, -73.970], zoom_start=13)
+    map_osm = folium.Map(tiles='cartodbdark_matter', location = [40.7831, -73.970], zoom_start=13)
     results = locations_of_best_match(descp, knn, model, train)
     temp = results[["latitude", "longitude"]].values.tolist()
 

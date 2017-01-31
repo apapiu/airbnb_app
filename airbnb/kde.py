@@ -38,7 +38,6 @@ median_price = train["price"].mean()
 
 print("95% of the listings are in between ${0} and ${1}".format(train["price"].quantile(0.05),train["price"].quantile(0.96)))
 
-
 sns.kdeplot(train["price"].values, bw=25.0)
 plt.axvline(x=median_price)
 plt.axvline(train["price"].quantile(0.05), color = "red", linewidth = 1)

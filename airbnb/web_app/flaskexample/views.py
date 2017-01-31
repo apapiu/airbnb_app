@@ -30,6 +30,10 @@ username = 'alexpapiu'
 con = psycopg2.connect(database = dbname, user = username)
 
 train = pd.read_sql_query("SELECT * FROM location_descriptions", con)
+listings = pd.read_sql_query("SELECT price, diff, listing_url, name FROM listings", con)
+
+
+
 nbd_counts = train["neighbourhood_cleansed"].value_counts()
 descp = train[["id", "neighborhood_overview"]]
 descp = descp.drop_duplicates()
@@ -37,6 +41,7 @@ descp = descp.drop_duplicates()
 
 print("loading models")
 model = joblib.load(os.path.join(home_folder, 'airbnb_app/Data/tf_idf_model.pkl'))
+
 knn = NearestNeighbors(500, metric = "cosine", algorithm = "brute")
 X = descp["neighborhood_overview"]
 
@@ -106,8 +111,9 @@ def cesareans_output():
     nbd = request.args.get('nbd')
     room_type = "Private room"
 
+    #nbd = "East Village"
     train = pd.read_sql_query("""
-                           SELECT * FROM small_listings
+                           SELECT * FROM listings
                            WHERE neighbourhood_cleansed = %(nbd)s
                            AND room_type = %(room_type)s;
                            """,
@@ -115,12 +121,15 @@ def cesareans_output():
                            params = {"nbd":nbd, "room_type":room_type})
 
 
+    train = train.sort_values("diff", ascending = False)
+
     births = []
     #showing some tables:
     for i in range(0,10):
        births.append(dict(price=train.iloc[i]['price'],
-                          city=train.iloc[i]['city'],
-                          room_type=train.iloc[i]['room_type']))
+                          city=train.iloc[i]['name'],
+                          room_type=train.iloc[i]['diff'],
+                          url=train.iloc[i]['listing_url']))
        the_result = ''
 
 
@@ -135,5 +144,22 @@ def cesareans_output():
     more_info = "The median price per day is ${0}. 95% of the listings are in \
                  between ${1} and ${2}".format(median, percentile_05, percentile_95)
 
-    return render_template('nbd.html', births = births, the_result = the_result,
+    return render_template('nbd.html', births = births, the_result = the_result, nbd = nbd,
                            script = script, div = div, title = title, more_info = more_info)
+
+
+
+@app.route('/nbd_rec')
+def nbd_rec():
+    descp = request.args.get('map_descp')
+
+    nbd_score = airbnb_pipeline.get_nbds(descp, knn = knn,
+                                model = model, train = train, nbd_counts = nbd_counts)
+
+    nbd_score = nbd_score["weighted_score"].dropna().sort_values(ascending = False).head(10)
+
+    nbd_score_list = []
+    for i in range(10):
+        nbd_score_list.append(dict(name = nbd_score.index[i], score = nbd_score.iloc[i]))
+
+    return render_template('nbd_rec.html', nbds = nbd_score_list, descp = descp)

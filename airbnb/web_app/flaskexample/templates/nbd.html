@@ -50,13 +50,13 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="#">Project name</a>
+          <a class="navbar-brand" href="/">BestBnB</a>
         </div>
         <div id="navbar" class="collapse navbar-collapse">
           <ul class="nav navbar-nav">
-            <li class="active"><a href="#">Home</a></li>
-            <li><a href="#about">About</a></li>
-            <li><a href="#contact">Contact</a></li>
+            <li class="active"><a href="/">Home</a></li>
+            <li><a href="/about">About</a></li>
+            <li><a href="/contact">Contact</a></li>
           </ul>
         </div><!--/.nav-collapse -->
       </div>
@@ -71,19 +71,47 @@
         <h3 class="lead">{{more_info}}</h3>
       </div>
 
+      <div>
+      <div class="starter-template">
+        <p class="lead"> Accomodates <input type="text" id="accomodates" name='accomodates' value=1>
+        </p>
+        <p class="lead"> Description <input type="text" id="descp" name='descp' value='Cute cozy room'>
+        </p>
+          <p class="lead"> Amenities <br>
+
+            <input type="checkbox" id="internet" value="internet"> Internet <br>
+            <input type="checkbox" id="washer/dryer" value="washer/dryer"> Washer/Dryer <br>
+            <input type="checkbox" id="tv" value="tv"> TV <br>
 
 
 
-<div class='bokeh'>
-{{ div|safe }}
-</div>
+
+      </div>
+
+        </p>
+
+      </div>
+
+      <!-- <iframe src="https://www.google.com/maps/d/embed?mid=1TC3HMjBX0G_ObfCt7uDjFupoVzE&hl=en_US" width="640" height="480"></iframe> -->
+
+
+<h2 class="lead"> Top listings in  {{nbd}}: </h2>
 
 <table class="table table-hover">
-<tr><th>Price</th><th>City</th><th>Room Type</th></tr>
+<tr><th>Price</th><th>Listing Title</th><th>Room Type</th></tr>
 {% for birth in births %}
-<tr><td>{{ birth['price'] }}</td><td>{{ birth['city']}}</td><td> {{ birth['room_type'] }}</td></tr>
+<tr>
+  <td>{{ birth['price'] }}</td>
+  <td><a href = "{{ birth['url'] }}"> {{ birth['city']}} <a></td>
+  <td> {{ birth['room_type'] }}</td>
+</tr>
 {% endfor %}
 </table>
+
+
+<div class='bokeh', style = float:right>
+{{ div|safe }}
+</div>
 
 
 <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
