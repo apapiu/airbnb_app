@@ -4,7 +4,15 @@ store, clean, and transform the airbnb data
 
 Author: Alexandru Papiu
 Date: January 20, 2017
+
 """
+
+#environment:
+#wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
+#conda create --name airbnb_app python=3 pandas scikit-learn folium sqlalchemy psycopg2 flask bokeh
+#source activate airbnb_app
+#pip install sqlalchemy-utils
+#git clone https://github.com/apapiu/airbnb_app.git
 
 import os
 import pandas as pd
@@ -100,7 +108,8 @@ def get_nbds(new_descp, knn, model, train, nbd_counts):
 
 
     nbd_score = pd.concat((nbd_score, nbd_counts), 1)
-    nbd_score["weighted_score"] = nbd_score["distance"]/np.log(nbd_score["neighbourhood_cleansed"])
+    nbd_score["weighted_score"] = (nbd_score["distance"]
+                                   /np.log(nbd_score["neighbourhood_cleansed"]))
 
     return nbd_score
 
@@ -121,11 +130,13 @@ def draw_point_map(results, nr_pts = 300):
 
 
 def get_heat_map(descp, knn, model, train):
-    map_osm = folium.Map(tiles='cartodbdark_matter', location = [40.7831, -73.970], zoom_start=13)
+    map_osm = folium.Map(tiles='cartodbdark_matter',
+                         location = [40.7831, -73.970], zoom_start=13)
     results = locations_of_best_match(descp, knn, model, train)
     temp = results[["latitude", "longitude"]].values.tolist()
 
-    map_osm.add_children(plugins.HeatMap(temp, min_opacity = 0.45, radius = 30, blur = 30,
+    map_osm.add_children(plugins.HeatMap(temp, min_opacity = 0.45,
+                                         radius = 30, blur = 30,
                                          gradient = return_color_scale(1),
                                          name = descp))
 
@@ -137,7 +148,8 @@ def add_heat_layer(mapa, descp, knn, model, train, scale=1):
     results = locations_of_best_match(descp, knn, model, train)
     temp = results[["latitude", "longitude"]].values.tolist()
 
-    mapa.add_children(plugins.HeatMap(temp, min_opacity = 0.45, radius = 40, blur = 30,
+    mapa.add_children(plugins.HeatMap(temp, min_opacity = 0.45,
+                                      radius = 40, blur = 30,
                                       gradient = return_color_scale(scale),
                                       name = descp))
     return mapa
@@ -216,7 +228,7 @@ def extract_features_price_model(train, add_BOW = False):
     return X_full
 
 
-def validate_model(model = Ridge(), data = X_full, y = y):
+def validate_model(model, data, y):
     """
     splits the data, fits the model and returns the rmse on val set
     """
