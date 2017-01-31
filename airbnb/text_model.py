@@ -11,7 +11,6 @@ from sklearn.preprocessing import Normalizer, StandardScaler
 #sql stuff:
 
 import airbnb_pipeline
-
 from sklearn.externals import joblib
 from sqlalchemy import create_engine
 from sqlalchemy_utils import database_exists, create_database
@@ -33,8 +32,10 @@ descp = train[["id", "neighborhood_overview"]]
 descp = descp.drop_duplicates()
 
 
-#MODEL:
 
+#~~~~~~
+#BOW TFIDF MODEL:
+#~~~~~~
 
 model = make_pipeline(TfidfVectorizer(stop_words = "english", min_df = 5,
                                       ngram_range = (1,2)),
@@ -50,6 +51,8 @@ knn.fit(X_proj)
 
 #save the first model:
 joblib.dump(model, os.path.join(home_folder, 'airbnb_app/Data/tf_idf_model.pkl'))
+
+
 
 
 #TODO: if brooklyn or manhattan in name then filter only for the places in that burrough:
@@ -79,4 +82,5 @@ nbd_score["weighted_score"].dropna().sort_values().tail(12)
 
 nbd_score = airbnb_pipeline.get_nbds("close to the beach", knn = knn,
                             model = model, train = train)
+
 nbd_score.dropna()["weighted_score"].sort_values().tail(12).plot(kind = "barh")

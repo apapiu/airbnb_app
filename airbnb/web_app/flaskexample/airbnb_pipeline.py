@@ -26,7 +26,8 @@ import psycopg2
 
 
 def small_clean(train):
-    columns_to_keep = ["price", "city", "neighbourhood_cleansed", "room_type", "latitude", "longitude"]
+    columns_to_keep = ["price", "city", "neighbourhood_cleansed", "room_type",
+                       "latitude", "longitude"]
     train = train[columns_to_keep]
     train.loc[:,"price"] = train["price"].str.replace("[$,]", "").astype("float")
     #eliminate crazy prices:
@@ -40,7 +41,8 @@ def clean(train):
     #columns_to_keep = ["price", "city", "neighbourhood_cleansed", "bedrooms",
     #"is_location_exact",
     #"property_type", "room_type", "name", "summary", "host_identity_verified",
-    #"amenities", "latitude", "longitude", "number_of_reviews", "zipcode", "accommodates", "review_scores_location",
+    #"amenities", "latitude", "longitude", "number_of_reviews", "zipcode",
+    #"accommodates", "review_scores_location",
     #"minimum_nights", "review_scores_rating"]
 
     #train = train[columns_to_keep]
@@ -52,8 +54,10 @@ def clean(train):
     train.loc[:,"host_identity_verified"] = train.host_identity_verified.fillna("unknown")
 
     #fill some NA's
-    train.loc[:,"review_scores_location"] = train["review_scores_location"].fillna(train.review_scores_location.mean())
-    train.loc[:,"review_scores_rating"] = train["review_scores_rating"].fillna(train.review_scores_rating.mean())
+    train.loc[:,"review_scores_location"] = (train["review_scores_location"]
+                                             .fillna(train.review_scores_location.mean()))
+    train.loc[:,"review_scores_rating"] = (train["review_scores_rating"]
+                                             .fillna(train.review_scores_rating.mean()))
 
     #use strings?
     train["bedrooms"] = train["bedrooms"].astype("str")
@@ -77,6 +81,7 @@ def clean(train):
 #~~~~~~~~~~~~~~~~~~~
 #MAPS RELATED STUFF:
 #~~~~~~~~~~~~~~~~~~~
+
 def get_nbds(new_descp, knn, model, train, nbd_counts):
     """
     builds a score for each neighborhood given a description as follows:
@@ -89,7 +94,9 @@ def get_nbds(new_descp, knn, model, train, nbd_counts):
 
     #invert the distance:
     results["distance"] = results["distance"].max() + 1 - results["distance"]
-    nbd_score = results.groupby("neighbourhood_cleansed")["distance"].sum().sort_values(ascending = False)
+    nbd_score = (results.groupby("neighbourhood_cleansed")["distance"]
+                        .sum()
+                        .sort_values(ascending = False))
 
 
     nbd_score = pd.concat((nbd_score, nbd_counts), 1)
@@ -107,7 +114,8 @@ def draw_point_map(results, nr_pts = 300):
     map_osm = folium.Map(tiles='Cartodb Positron', location = [40.661408, -73.961750])
     #this is stupidly slow:
     for index, row in results[:nr_pts].iterrows():
-        folium.CircleMarker(location=[row["latitude"], row["longitude"]], radius=row["latitude"], color = "pink").add_to(map_osm)
+        folium.CircleMarker(location=[row["latitude"], row["longitude"]],
+                            radius=row["latitude"], color = "pink").add_to(map_osm)
 
     return(map_osm)
 
@@ -155,3 +163,64 @@ def return_color_scale(n):
     df = pd.Series(get_colors(n))
     df.index = np.power(df.index/10, 1/1.75)
     return df.to_dict()
+
+
+#~~~~~~
+#MODELS:
+#~~~~~~
+
+def rmse(y_true, y_pred):
+    return(np.sqrt(metrics.mean_squared_error(y_true, y_pred)))
+
+def one_hot_encode_amenities(train):
+    """
+    amenities comes a weird form, this function one hot encodes them
+    """
+    train.amenities = train.amenities.str.replace("[{}]", "")
+    amenities =  ",".join(train.amenities)
+    amenities = np.unique(amenities.split(","))
+    amenities_dict = dict(enumerate(amenities))
+
+    train.amenities = train.amenities.str.split(",")
+    amenity_ohe = [[ame in amenity_list for ame in amenities]
+                                        for amenity_list in train.amenities]
+    amenity_ohe = 1*(np.array(amenity_ohe))
+
+    return amenity_ohe
+
+def extract_features_price_model(train, add_BOW = False):
+    """
+    encodes categorical variables, concatenates with numeric and amenities
+    optionally add a sparse bag of words feature matrix
+    """
+
+    scale = StandardScaler()
+
+    #get dummies one hot encodes categorical feats and leaves numeric feats alone:
+    X_num = pd.get_dummies(train_num_cat)
+    X_num = scale.fit_transform(X_num)
+
+    X_full = np.hstack((X_num, amenity_ohe))
+
+    #whether to add BOW to final features - helps marginally:
+
+    if add_BOW == True:
+        train_text = train[["name", "summary", "amenities"]]
+        #keep min_df large here ~ 300 otherwise detrimental to model
+        vect = TfidfVectorizer(stop_words = "english", min_df = 300)
+        X_text = vect.fit_transform(train["summary"])
+        X_full = np.hstack((X_num, amenity_ohe, X_text.toarray()))
+    else:
+        X_full = np.hstack((X_num, amenity_ohe))
+
+    return X_full
+
+
+def validate_model(model = Ridge(), data = X_full, y = y):
+    """
+    splits the data, fits the model and returns the rmse on val set
+    """
+    #TODO: make it return MAE or R^2 here
+    X_tr, X_val, y_tr, y_val = train_test_split(data, y, random_state = 3)
+    preds = model.fit(X_tr, y_tr).predict(X_val)
+    return rmse(preds_1, y_val)

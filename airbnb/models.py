@@ -1,16 +1,8 @@
-#airbnb data exploration:
-#build a model that predicts whether a new listing is overpriced or underpriced.
-#or just how much a new apartment should look at.
-
-#think of it as a expert recommender that will tell you how much you should
-#expect to pay based on location, host, review, # of bedrooms.
-
-#not a recommendation engine but more like giving people a context in which to text
-#to make informed decision
-#sort of like having an expert by your side.
-
-%matplotlib inline
-%config InlineBackend.figure_format = 'retina'
+"""
+model predicting if an airbnb listing is fair or not
+"""
+#%matplotlib inline
+#%config InlineBackend.figure_format = 'retina'
 
 import numpy as np
 import pandas as pd
@@ -26,7 +18,6 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn import metrics
 import xgboost as xgb
 
-
 from sklearn.externals import joblib
 from sqlalchemy import create_engine
 from sqlalchemy_utils import database_exists, create_database
@@ -41,6 +32,64 @@ import airbnb_pipeline
 def rmse(y_true, y_pred):
     return(np.sqrt(metrics.mean_squared_error(y_true, y_pred)))
 
+def one_hot_encode_amenities(train):
+    """
+    amenities comes a weird form, this function one hot encodes them
+    """
+    train.amenities = train.amenities.str.replace("[{}]", "")
+    amenities =  ",".join(train.amenities)
+    amenities = np.unique(amenities.split(","))
+    amenities_dict = dict(enumerate(amenities))
+
+    train.amenities = train.amenities.str.split(",")
+    amenity_ohe = [[ame in amenity_list for ame in amenities]
+                                        for amenity_list in train.amenities]
+    amenity_ohe = 1*(np.array(amenity_ohe))
+
+    return amenity_ohe
+
+def extract_features_price_model(train, add_BOW = False):
+    """
+    encodes categorical variables, concatenates with numeric and amenities
+    optionally add a sparse bag of words feature matrix
+    """
+
+    scale = StandardScaler()
+
+    #get dummies one hot encodes categorical feats and leaves numeric feats alone:
+    X_num = pd.get_dummies(train_num_cat)
+    X_num = scale.fit_transform(X_num)
+
+    X_full = np.hstack((X_num, amenity_ohe))
+
+    #whether to add BOW to final features - helps marginally:
+
+    if add_BOW == True:
+        train_text = train[["name", "summary", "amenities"]]
+        #keep min_df large here ~ 300 otherwise detrimental to model
+        vect = TfidfVectorizer(stop_words = "english", min_df = 300)
+        X_text = vect.fit_transform(train["summary"])
+        X_full = np.hstack((X_num, amenity_ohe, X_text.toarray()))
+    else:
+        X_full = np.hstack((X_num, amenity_ohe))
+
+    return X_full
+
+
+def validate_model(model = Ridge(), data = X_full, y = y):
+    """
+    splits the data, fits the model and returns the rmse on val set
+    """
+    #TODO: make it return MAE or R^2 here
+    X_tr, X_val, y_tr, y_val = train_test_split(data, y, random_state = 3)
+    preds = model.fit(X_tr, y_tr).predict(X_val)
+    return rmse(preds_1, y_val)
+
+
+#~~~~~~~~~~~~~~~
+#POSTGRES:
+#~~~~~~~~~~~~~~
+
 dbname = 'airbnb_db'
 username = 'alexpapiu'
 engine = create_engine('postgres://%s@localhost/%s'%(username,dbname))
@@ -50,7 +99,6 @@ sql_query = """SELECT * FROM small_listings;"""
 train = pd.read_sql_query(sql_query, con, index_col = "id")
 
 
-
 os.chdir("/Users/alexpapiu/Documents/Insight/airbnb_app/Data")
 train = pd.read_csv("new-york-city_2016-12-03_data_listings.csv")
 
@@ -58,26 +106,9 @@ train = pd.read_csv("new-york-city_2016-12-03_data_listings.csv")
 train = airbnb_pipeline.clean(train)
 
 
-#sm_train = train[["price", "room_type", "neighbourhood_cleansed", "accommodates"]]
-#sm_train.to_csv("/Users/alexpapiu/Documents/Insight/Project/Data/sm_listings.csv", index = False)
-
-
-#train  = train[train["room_type"] == 'Entire home/apt']
-#train.to_csv("/Users/alexpapiu/Documents/Insight/Project/Data/clean_listings.csv")
-
-#one hot encode amenities:
-train.amenities = train.amenities.str.replace("[{}]", "")
-amenities =  ",".join(train.amenities)
-amenities = np.unique(amenities.split(","))
-amenities_dict = dict(enumerate(amenities))
-
-train.amenities = train.amenities.str.split(",")
-amenity_ohe = [[ame in amenity_list for ame in amenities]
-                                    for amenity_list in train.amenities]
-amenity_ohe = 1*(np.array(amenity_ohe))
-
+#~~~~~~~~
 #MODELS:
-
+#~~~~~~~
 
 y = train["price"]
 train_num_cat = train[["neighbourhood_cleansed",
@@ -95,43 +126,25 @@ train_num_cat = train[["neighbourhood_cleansed",
                        "minimum_nights"]]
 
 
+
+X_full = extract_features_price_model(train)
+
+
+
+validate_model(model = Ridge())
+
+
+
 model = Ridge()
 #model = RandomForestRegressor(n_estimators = 100)
 #model = xgb.XGBRegressor(learning_rate = 0.1, max_depth = 6, n_estimators = 150)
 
-
-#DUMMY ENCODING:
-X_num = pd.get_dummies(train_num_cat)
-scale = StandardScaler()
-X_num = scale.fit_transform(X_num)
-
-
-
-X_num.shape
-#BAG OF WORDS:
-train_text = train[["name", "summary", "amenities"]]
-vect = TfidfVectorizer(stop_words = "english", min_df = 300)
-X_text = vect.fit_transform(train["summary"])
-X_text.shape
-
-
-#using the text helps very marginally:
-X_full = np.hstack((X_num,
-                    amenity_ohe)) #, X_text.toarray()))
-
-X_full.shape
-
-
-X_tr, X_val, y_tr, y_val = train_test_split(X_full, y, random_state = 3)
-
-preds_1 = model.fit(X_tr, y_tr).predict(X_val)
 #baseline score:
-preds_2 = len(y_val)*[y_tr.mean()]
+always_mean_preds = len(y_val)*[y_tr.mean()]
+rmse(always_mean_preds, y_val)
 
+validate_model(model = Ridge())
 
-rmse(preds_2, y_val)
-rmse(preds_1, y_val)
-model.score(X_val, y_val)
 
 
 
