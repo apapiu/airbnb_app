@@ -18,9 +18,9 @@ import psycopg2
 %matplotlib inline
 
 
-home_folder = '/Users/alexpapiu/Documents/Insight/'
-dbname = 'airbnb_db'
-username = 'alexpapiu'
+home_folder = os.environ["home_folder"]
+dbname = os.environ["dbname"]
+username = os.environ["username"]
 
 con = psycopg2.connect(database = dbname, user = username)
 
