@@ -6,9 +6,10 @@ model predicting if an airbnb listing is fair or not
 
 import numpy as np
 import pandas as pd
-import seaborn as sns
+#import seaborn as sns
 import os
-import pylab
+import sys
+#import pylab
 
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 from sklearn.cross_validation import cross_val_score, train_test_split
@@ -26,7 +27,10 @@ import psycopg2
 from keras.models import Sequential
 from keras.layers import Dense, Dropout
 
-os.chdir("/Users/alexpapiu/Documents/Insight/airbnb_app/airbnb/web_app/flaskexample/")
+
+home_folder = "/Users/alexpapiu/Documents/Insight/"
+
+sys.path.append(os.path.join(home_folder, "airbnb_app/airbnb/web_app/flaskexample/"))
 import airbnb_pipeline
 
 def rmse(y_true, y_pred):
@@ -48,19 +52,19 @@ def one_hot_encode_amenities(train):
 
     return amenity_ohe
 
-def extract_features_price_model(train, add_BOW = False):
+def extract_features_price_model(train,add_BOW = False):
     """
     encodes categorical variables, concatenates with numeric and amenities
     optionally add a sparse bag of words feature matrix
     """
+
 
     scale = StandardScaler()
 
     #get dummies one hot encodes categorical feats and leaves numeric feats alone:
     X_num = pd.get_dummies(train_num_cat)
     X_num = scale.fit_transform(X_num)
-
-    X_full = np.hstack((X_num, amenity_ohe))
+    amenity_ohe = one_hot_encode_amenities(train)
 
     #whether to add BOW to final features - helps marginally:
 
@@ -76,14 +80,14 @@ def extract_features_price_model(train, add_BOW = False):
     return X_full
 
 
-def validate_model(model = Ridge(), data = X_full, y = y):
+def validate_model(model, data, y):
     """
     splits the data, fits the model and returns the rmse on val set
     """
     #TODO: make it return MAE or R^2 here
     X_tr, X_val, y_tr, y_val = train_test_split(data, y, random_state = 3)
     preds = model.fit(X_tr, y_tr).predict(X_val)
-    return rmse(preds_1, y_val)
+    return rmse(preds, y_val)
 
 
 #~~~~~~~~~~~~~~~
@@ -95,15 +99,21 @@ username = 'alexpapiu'
 engine = create_engine('postgres://%s@localhost/%s'%(username,dbname))
 
 con = psycopg2.connect(database = dbname, user = username)
-sql_query = """SELECT * FROM small_listings;"""
+sql_query = """
+            SELECT id, neighbourhood_cleansed,
+                   bedrooms, is_location_exact,
+                   property_type, room_type,
+                   city, latitude,
+                   longitude, accommodates,
+                   review_scores_location,
+                   review_scores_rating,
+                   number_of_reviews,
+                   amenities, name,
+                   minimum_nights, price FROM listings;
+            """
+
 train = pd.read_sql_query(sql_query, con, index_col = "id")
 
-
-os.chdir("/Users/alexpapiu/Documents/Insight/airbnb_app/Data")
-train = pd.read_csv("new-york-city_2016-12-03_data_listings.csv")
-
-
-train = airbnb_pipeline.clean(train)
 
 
 #~~~~~~~~
@@ -111,6 +121,7 @@ train = airbnb_pipeline.clean(train)
 #~~~~~~~
 
 y = train["price"]
+
 train_num_cat = train[["neighbourhood_cleansed",
                        "bedrooms",
                        "is_location_exact",
@@ -125,38 +136,41 @@ train_num_cat = train[["neighbourhood_cleansed",
                        "number_of_reviews",
                        "minimum_nights"]]
 
-
-
 X_full = extract_features_price_model(train)
 
 
-
-validate_model(model = Ridge())
-
-
-
-model = Ridge()
-#model = RandomForestRegressor(n_estimators = 100)
-#model = xgb.XGBRegressor(learning_rate = 0.1, max_depth = 6, n_estimators = 150)
+X_tr, X_val, y_tr, y_val = train_test_split(X_full, y, random_state = 3)
 
 #baseline score:
 always_mean_preds = len(y_val)*[y_tr.mean()]
 rmse(always_mean_preds, y_val)
 
-validate_model(model = Ridge())
 
 
+model = Ridge()
+#model = RandomForestRegressor(n_estimators = 50)
+#model = xgb.XGBRegressor(learning_rate = 0.1, max_depth = 6, n_estimators = 150)
 
+validate_model(model = model, data = X_full, y = y)
 
 #predicting:
-
 train["preds"] = model.predict(X_full)
 train["diff"] = train["preds"] - train["price"]
 
-#train[["listing_url", "name", "diff"]]
+#write to train now with prediction.
+
+listings = pd.read_sql_query("select * from listings", con, index_col = "id")
+
+listings["preds"] = model.predict(X_full)
+listings["diff"] = listings["preds"] - listings["price"]
+
 train.to_sql("listings", con = engine, if_exists = "replace")
 
 
+
+#~~~~~~~~~~~~
+#NEURAL NETS:
+#~~~~~~~~~~~
 
 model = Sequential()
 model.add(Dense(512, activation = "relu", input_dim = X_tr.shape[1]))

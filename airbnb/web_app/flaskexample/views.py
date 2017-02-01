@@ -30,7 +30,8 @@ username = 'alexpapiu'
 con = psycopg2.connect(database = dbname, user = username)
 
 train = pd.read_sql_query("SELECT * FROM location_descriptions", con)
-listings = pd.read_sql_query("SELECT price, diff, listing_url, name FROM listings", con)
+listings = pd.read_sql_query("SELECT price, diff, listing_url,
+                             name FROM listings", con)
 
 
 
