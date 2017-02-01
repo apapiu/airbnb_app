@@ -22,22 +22,17 @@ from bokeh.charts import Histogram
 from bokeh.embed import components
 
 
-home_folder = os.environ["home_folder"]
-dbname = os.environ["dbname"]
-username = os.environ["username"]
+home_folder = '/Users/alexpapiu/Documents/Insight/'
+dbname = 'airbnb_db'
+username = 'alexpapiu'
 
-if sys.platform == "linux":
-    password = os.environ["password"]
 
-if sys.platform == "linux":
-    connect_str = "dbname='%s' user='%s' host='localhost' password='%s'"%(dbname,username,password)
-    con = psycopg2.connect(connect_str)
-else:
-    con = psycopg2.connect(database = dbname, user = username)
-
+con = psycopg2.connect(database = dbname, user = username)
 
 train = pd.read_sql_query("SELECT * FROM location_descriptions", con)
-listings = pd.read_sql_query("SELECT price, diff, listing_url, name FROM listings_price", con)
+listings = pd.read_sql_query("SELECT price, diff, listing_url,
+                             name FROM listings", con)
+
 
 
 nbd_counts = train["neighbourhood_cleansed"].value_counts()
@@ -119,7 +114,7 @@ def cesareans_output():
 
     #nbd = "East Village"
     train = pd.read_sql_query("""
-                           SELECT * FROM listings_price
+                           SELECT * FROM listings
                            WHERE neighbourhood_cleansed = %(nbd)s
                            AND room_type = %(room_type)s;
                            """,

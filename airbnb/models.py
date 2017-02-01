@@ -17,7 +17,7 @@ from sklearn.preprocessing import StandardScaler, PolynomialFeatures
 from sklearn.linear_model import Ridge, RidgeCV, Lasso
 from sklearn.ensemble import RandomForestRegressor
 from sklearn import metrics
-#import xgboost as xgb
+import xgboost as xgb
 
 from sklearn.externals import joblib
 from sqlalchemy import create_engine
@@ -28,10 +28,7 @@ from keras.models import Sequential
 from keras.layers import Dense, Dropout
 
 
-home_folder = os.environ["home_folder"]
-dbname = os.environ["dbname"]
-username = os.environ["username"]
-
+home_folder = "/Users/alexpapiu/Documents/Insight/"
 
 sys.path.append(os.path.join(home_folder, "airbnb_app/airbnb/web_app/flaskexample/"))
 import airbnb_pipeline
@@ -97,6 +94,8 @@ def validate_model(model, data, y):
 #POSTGRES:
 #~~~~~~~~~~~~~~
 
+dbname = 'airbnb_db'
+username = 'alexpapiu'
 engine = create_engine('postgres://%s@localhost/%s'%(username,dbname))
 
 con = psycopg2.connect(database = dbname, user = username)
@@ -139,6 +138,7 @@ train_num_cat = train[["neighbourhood_cleansed",
 
 X_full = extract_features_price_model(train)
 
+
 X_tr, X_val, y_tr, y_val = train_test_split(X_full, y, random_state = 3)
 
 #baseline score:
@@ -153,6 +153,9 @@ model = Ridge()
 
 validate_model(model = model, data = X_full, y = y)
 
+#predicting:
+train["preds"] = model.predict(X_full)
+train["diff"] = train["preds"] - train["price"]
 
 #write to train now with prediction.
 
@@ -161,7 +164,8 @@ listings = pd.read_sql_query("select * from listings", con, index_col = "id")
 listings["preds"] = model.predict(X_full)
 listings["diff"] = listings["preds"] - listings["price"]
 
-listings.to_sql("listings_price", con = engine, if_exists = "replace")
+train.to_sql("listings", con = engine, if_exists = "replace")
+
 
 
 #~~~~~~~~~~~~

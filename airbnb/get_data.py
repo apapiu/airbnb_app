@@ -18,9 +18,9 @@ from sqlalchemy_utils import database_exists, create_database
 import psycopg2
 
 
-home_folder = os.environ["home_folder"]
-dbname = os.environ["dbname"]
-username = os.environ["username"]
+home_folder = '/Users/alexpapiu/Documents/Insight/'
+dbname = 'airbnb_db'
+username = 'alexpapiu'
 get_images = False
 
 #local module:
@@ -63,15 +63,9 @@ location_descriptions = location_descriptions.dropna()
 #dumping to a Postgres database:
 #~~~~~~~~~~~~~~~~~~~~~~~
 
-#for aws:
-#password = '7znxz567'
-#if not database_exists(engine.url):
-#    create_database(engine.url)
-#print(database_exists(engine.url))
-
-
 
 engine = create_engine('postgres://%s@localhost/%s'%(username,dbname))
+con = psycopg2.connect(database = dbname, user = username)
 
 #print(engine.url)
 
