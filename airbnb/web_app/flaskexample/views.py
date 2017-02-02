@@ -81,17 +81,24 @@ def map_input():
 
 @app.route('/map')
 def return_map():
-        descp = request.args.get('map_descp')
-        descp_2 = request.args.get('map_descp_2')
-        descp_3 = request.args.get('map_descp_3')
+        descp = request.args.get('descp')
+
+        descp_2 = None
+        descp_3 = None
+
+        try:
+            descp_2 = request.args.get('map_descp_2')
+            descp_3 = request.args.get('map_descp_3')
+        except:
+            pass
 
         map_osm = airbnb_pipeline.get_heat_map(str(descp), knn, model, train)
 
-        if descp_2 is not "":
+        if descp_2 and descp_2 is not "":
             map_osm = airbnb_pipeline.add_heat_layer(map_osm, descp_2,knn,
                                                      model, train, scale  = 1)
 
-        if descp_3 is not "":
+        if descp_2 and descp_3 is not "":
             map_osm = airbnb_pipeline.add_heat_layer(map_osm, descp_3,knn,
                                                      model, train, scale  = 2)
 
@@ -106,6 +113,7 @@ def return_map():
         map_osm.save(outfile='flaskexample/templates/map.html')
 
         return render_template("map.html")
+        #return render_template("rec_temp.html")
 
 #~~~~~~~~~~~~~~~~~~~
 #Neighborhood Views:
@@ -156,8 +164,14 @@ def cesareans_output():
 
 @app.route('/nbd_rec')
 def nbd_rec():
-    descp = request.args.get('map_descp')
+    descp = request.args.get('descp')
 
+
+    #map:
+    map_osm = airbnb_pipeline.get_heat_map(str(descp), knn, model, train)
+    map_osm.save(outfile='flaskexample/templates/map.html')
+
+    #scores:
     nbd_score = airbnb_pipeline.get_nbds(descp, knn = knn,
                                 model = model, train = train, nbd_counts = nbd_counts)
 

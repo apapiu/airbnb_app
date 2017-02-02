@@ -1,58 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-    <meta name="description" content="">
-    <meta name="author" content="">
-    <link rel="icon" href="../../favicon.ico">
+{% extends "head.html" %}
 
-    <title>Starter Template for Bootstrap</title>
-
-    <!-- Bootstrap core CSS -->
-    <!-- <link href="../../dist/css/bootstrap.min.css" rel="stylesheet"> -->
-    <link href="../static/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
-    <!-- <link href="../../assets/css/ie10-viewport-bug-workaround.css" rel="stylesheet"> -->
-
-    <!-- Custom styles for this template -->
-    <!-- <link href="starter-template.css" rel="stylesheet"> -->
-
-
-    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-    <!--[if lt IE 9]>
-      <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
-      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-    <![endif]-->
-  </head>
-
-  <body>
-
-    <!-- {%include 'barplot.html'%} -->
-
-    <nav class="navbar navbar-inverse navbar-fixed-top">
-      <div class="container">
-        <div class="navbar-header">
-          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-            <span class="sr-only">Toggle navigation</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
-          <a class="navbar-brand" href="#">BestBnB</a>
-        </div>
-        <div id="navbar" class="collapse navbar-collapse">
-          <ul class="nav navbar-nav">
-            <li class="active"><a href="#">Home</a></li>
-            <li><a href="#about">About</a></li>
-            <li><a href="#contact">Contact</a></li>
-          </ul>
-        </div><!--/.nav-collapse -->
-      </div>
-    </nav>
+{% block content %}
 
 <br><br>
 
@@ -60,47 +8,51 @@
 
       <div class="starter-template">
         <!-- <h1>BestBnB</h1> -->
-        <h2 class="lead">Get a fairly priced AirBnb in a neighborhood you'll love.</h2>
+        <h2 class="lead">Welcome to BestBnB, the app that helps you get a fairly priced AirBnb in a neighborhood you'll love  </h2>
       </div>
 
     <div class = "container">
 
-      <form  action="/map" method="GET">
+      <form  action="/nbd_rec" method="GET">
         <div class="form-group">
           <br>
-          <label for="nbd">Describe Some Areas you'd like to live in:</label> <br>
+          <label for="nbd" class="lead" >
+            Describe the kind of area you'd like to live in. You can use natural language or just list terms. <br>
+            For example you could type "hip cute trendy" or "I'd like to stay in a safe neighborhood
+            close to live music".</label> <br>
 
           <!-- <label for="nbd">Get Description:</label> -->
-          <input type="text" id="map_descp" name='map_descp' placeholder="eg. hip">
+          <input class="form-control input-lg" type="text" id='descp' name='descp' placeholder="eg. hip" >
+
           <!-- <label for="nbd">Get Description:</label> <br> -->
-          <input type="text" id="map_descp_2" name='map_descp_2' placeholder="">
+          <!-- <input type="text" id='map_descp_2' name='map_descp_2' placeholder=""> -->
           <!-- <label for="nbd">Get Description:</label> <br> -->
-          <input type="text" id="map_descp_3" name='map_descp_3' placeholder="">
+          <!-- <input type="text" id='map_descp_3' name='map_descp_3' placeholder=""> -->
 
         </div>
 
         <div>
 
-        <form  action="/map" method="GET">
+        <!-- <form  action="/map" method="GET">
           <button type="submit" class="btn btn-default btn-lg">Check out the vibe!</button>
-        </form>
+        </form> -->
 
-        <form  action="/nbd_rec" method="GET">
-          <button type="submit" class="btn btn-default btn-lg">See Best Nbds!</button>
-        </form>
+        <!-- <form  action="/nbd_rec" method="GET"> -->
+          <!-- <button type="submit" class="btn btn-default btn-lg">See Best Nbds!</button> -->
+        <!-- </form> -->
 
         </div>
 
       </form>
-
+<!--
 
             <form  action="/nbd_rec" method="GET">
               <div class="form-group">
                 <br>
                 <label for="nbd">Describe Some Areas you'd like to live in:</label> <br>
 
-                <!-- <label for="nbd">Get Description:</label> -->
-                <input type="text" id="nbd_descp" name='map_descp' placeholder="eg. hip">
+                <label for="nbd">Get Description:</label>
+                <input type="text" id="descp" name='descp' placeholder="eg. hip">
 
 
               </div>
@@ -109,20 +61,20 @@
                 <button type="submit" class="btn btn-default btn-lg">See Best Nbds!</button>
               </div>
 
-            </form>
+            </form> -->
 
       <br><br>
       <form  action="/nbd" method="GET">
         <div class="form-group">
-          <label for="nbd">Pick a neighborhood:</label> <br>
-          <input type="text" id="nbd" name='nbd' placeholder="e.g. East Village">
+          <label for="nbd" class="lead" >Or see best listings in a specific neighborhood:</label> <br>
+          <input type="text" class="form-control" id="nbd" name='nbd' placeholder="e.g. East Village">
 
 
         </div>
-
+<!--
         <div>
           <button type="submit" class="btn btn-default btn-lg">Look at a neighborhood!</button>
-        </div>
+        </div> -->
 
             </form>
 
@@ -146,5 +98,5 @@
     <script src="../../dist/js/bootstrap.min.js"></script>
     <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
     <script src="../../assets/js/ie10-viewport-bug-workaround.js"></script>
-  </body>
-</html>
+
+{% endblock %}

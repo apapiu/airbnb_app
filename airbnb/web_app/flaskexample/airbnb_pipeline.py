@@ -131,7 +131,7 @@ def draw_point_map(results, nr_pts = 300):
 
 def get_heat_map(descp, knn, model, train):
     map_osm = folium.Map(tiles='cartodbdark_matter',
-                         location = [40.7831, -73.970], zoom_start=13)
+                         location = [40.7158, -73.9970], zoom_start=13)
     results = locations_of_best_match(descp, knn, model, train)
     temp = results[["latitude", "longitude"]].values.tolist()
 
