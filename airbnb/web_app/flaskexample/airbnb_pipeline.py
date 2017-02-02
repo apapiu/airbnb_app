@@ -140,6 +140,11 @@ def get_heat_map(descp, knn, model, train):
                                          gradient = return_color_scale(1),
                                          name = descp))
 
+    for i in range(10):
+            folium.Marker([results.iloc[i].latitude, results.iloc[i].longitude],
+                          popup=results.iloc[i].neighborhood_overview,
+                          icon=folium.Icon(color='black',icon='glyphicon-home')).add_to(map_osm)
+
     return map_osm
 
 

@@ -30,8 +30,7 @@ username = 'alexpapiu'
 con = psycopg2.connect(database = dbname, user = username)
 
 train = pd.read_sql_query("SELECT * FROM location_descriptions", con)
-listings = pd.read_sql_query("SELECT price, diff, listing_url,
-                             name FROM listings", con)
+listings = pd.read_sql_query("SELECT price, diff, listing_url, name FROM listings_price", con)
 
 
 
@@ -114,7 +113,7 @@ def cesareans_output():
 
     #nbd = "East Village"
     train = pd.read_sql_query("""
-                           SELECT * FROM listings
+                           SELECT * FROM listings_price
                            WHERE neighbourhood_cleansed = %(nbd)s
                            AND room_type = %(room_type)s;
                            """,
