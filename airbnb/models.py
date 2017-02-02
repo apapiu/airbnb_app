@@ -28,8 +28,7 @@ from keras.models import Sequential
 from keras.layers import Dense, Dropout
 
 
-home_folder = "/Users/alexpapiu/Documents/Insight/"
-
+home_folder = os.environ["home_folder"]
 sys.path.append(os.path.join(home_folder, "airbnb_app/airbnb/web_app/flaskexample/"))
 import airbnb_pipeline
 
@@ -94,9 +93,23 @@ def validate_model(model, data, y):
 #POSTGRES:
 #~~~~~~~~~~~~~~
 
-dbname = 'airbnb_db'
-username = 'alexpapiu'
-engine = create_engine('postgres://%s@localhost/%s'%(username,dbname))
+
+home_folder = os.environ["home_folder"]
+dbname = os.environ["dbname"]
+username = os.environ["username"]
+
+if sys.platform == "linux":
+    password = os.environ["password"]
+
+if sys.platform == "linux":
+    connect_str = "dbname='%s' user='%s' host='localhost' password='%s'"%(dbname,username,password)
+    con = psycopg2.connect(connect_str)
+    engine = create_engine('postgres://%s@localhost/%s'%(username,dbname, password))
+
+else:
+    con = psycopg2.connect(database = dbname, user = username)
+    engine = create_engine('postgres://%s@localhost/%s'%(username,dbname))
+
 
 con = psycopg2.connect(database = dbname, user = username)
 sql_query = """

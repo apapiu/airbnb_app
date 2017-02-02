@@ -22,12 +22,19 @@ from bokeh.charts import Histogram
 from bokeh.embed import components
 
 
-home_folder = '/Users/alexpapiu/Documents/Insight/'
-dbname = 'airbnb_db'
-username = 'alexpapiu'
+home_folder = os.environ["home_folder"]
+dbname = os.environ["dbname"]
+username = os.environ["username"]
 
+if sys.platform == "linux":
+    password = os.environ["password"]
 
-con = psycopg2.connect(database = dbname, user = username)
+if sys.platform == "linux":
+    connect_str = "dbname='%s' user='%s' host='localhost' password='%s'"%(dbname,username,password)
+    con = psycopg2.connect(connect_str)
+else:
+    con = psycopg2.connect(database = dbname, user = username)
+    
 
 train = pd.read_sql_query("SELECT * FROM location_descriptions", con)
 listings = pd.read_sql_query("SELECT price, diff, listing_url, name FROM listings_price", con)

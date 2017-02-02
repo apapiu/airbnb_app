@@ -18,11 +18,18 @@ import psycopg2
 %matplotlib inline
 
 
-home_folder = '/Users/alexpapiu/Documents/Insight/'
-dbname = 'airbnb_db'
-username = 'alexpapiu'
+home_folder = os.environ["home_folder"]
+dbname = os.environ["dbname"]
+username = os.environ["username"]
 
-con = psycopg2.connect(database = dbname, user = username)
+if sys.platform == "linux":
+    password = os.environ["password"]
+
+if sys.platform == "linux":
+    connect_str = "dbname='%s' user='%s' host='localhost' password='%s'"%(dbname,username,password)
+    con = psycopg2.connect(connect_str)
+else:
+    con = psycopg2.connect(database = dbname, user = username)
 
 train = pd.read_sql_query("SELECT * FROM location_descriptions", con)
 nbd_counts = train["neighbourhood_cleansed"].value_counts()

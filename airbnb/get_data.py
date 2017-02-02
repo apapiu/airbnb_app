@@ -18,9 +18,10 @@ from sqlalchemy_utils import database_exists, create_database
 import psycopg2
 
 
-home_folder = '/Users/alexpapiu/Documents/Insight/'
-dbname = 'airbnb_db'
-username = 'alexpapiu'
+home_folder = os.environ["home_folder"]
+dbname = os.environ["dbname"]
+username = os.environ["username"]
+
 get_images = False
 
 #local module:
