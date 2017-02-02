@@ -34,11 +34,10 @@ if sys.platform == "linux":
     con = psycopg2.connect(connect_str)
 else:
     con = psycopg2.connect(database = dbname, user = username)
-    
+
 
 train = pd.read_sql_query("SELECT * FROM location_descriptions", con)
 listings = pd.read_sql_query("SELECT price, diff, listing_url, name FROM listings_price", con)
-
 
 
 nbd_counts = train["neighbourhood_cleansed"].value_counts()
@@ -153,7 +152,6 @@ def cesareans_output():
 
     return render_template('nbd.html', births = births, the_result = the_result, nbd = nbd,
                            script = script, div = div, title = title, more_info = more_info)
-
 
 
 @app.route('/nbd_rec')
