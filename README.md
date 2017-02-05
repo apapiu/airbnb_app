@@ -1,7 +1,7 @@
-# Insight Data Science Project -  BestBnB
-A web app that lets you find a fairly priced AirBnB in a Neighborhood you'll love.
+## Insight Data Science Project -  BestBnB
+A web app that lets you find a fairly priced AirBnB in a neighborhood you'll love.
 
-# Check out the app live [here]. Note that it is still under construction.
+### Check out the app live [here](apapiu.com). Note that it is still under construction.
 
 ### Runnning the App Locally:
 
