@@ -1,6 +1,7 @@
-# airbnb_app
-Insight Project - Predicting whether a new Listing is Fair plus EDA
+## Insight Data Science Project -  BestBnB
+A web app that lets you find a fairly priced AirBnB in a neighborhood you'll love.
 
+### Check out the app live [here](https://www.apapiu.com/). Note that it is still under construction.
 
 ### Runnning the App Locally:
 
@@ -15,14 +16,14 @@ Make sure to have miniconda(`wget https://repo.continuum.io/miniconda/Miniconda3
 - activate the environment: `source activate airbnb_app`
 - pip install some stuff not on conda: `pip install sqlalchemy-utils`
 
-Create a username and database in postgres. 
 
-- add some enviornment variables in your `.bashrc` (or `.bash_profile` if on MacOS):
 
-    export home_folder=$'/the/folder/you/cloned/the/repo/in'
-    export dbname=$'your_database_name'
-    export username=$'your_username' 
-    export password=$'*****' #only needed for linux
+- Create a username and database in postgres and add the needed enviornment variables in your `.bashrc` (or `.bash_profile` if on MacOS):
+
+        export home_folder=$'/the/folder/you/cloned/the/repo/in'
+        export dbname=$'your_database_name'
+        export username=$'your_username' 
+        export password=$'*****' #only needed for linux
     
    
 - run: `python /airbnb/get_data.py`
