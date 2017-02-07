@@ -26,8 +26,8 @@
     <script src="../../assets/js/ie-emulation-modes-warning.js"></script>
 
     <!-- BOKEH PLOTS -->
-    <link href="http://cdn.pydata.org/bokeh/release/bokeh-0.12.3.min.css" rel="stylesheet" type="text/css">
-    <script src="http://cdn.pydata.org/bokeh/release/bokeh-0.12.3.min.js"></script>
+    <link href="http://cdn.pydata.org/bokeh/release/bokeh-0.12.4.min.css" rel="stylesheet" type="text/css">
+    <script src="http://cdn.pydata.org/bokeh/release/bokeh-0.12.4.min.js"></script>
 
     {{script|safe}}
 
@@ -64,7 +64,7 @@
 
 <br><br>
 
-
+<div class="container">
       <div class="starter-template">
         <h2>{{title}}</h2>
         <h3 class="lead">{{more_info}}</h3>
@@ -100,25 +100,29 @@
 
       <!-- <iframe src="https://www.google.com/maps/d/embed?mid=1TC3HMjBX0G_ObfCt7uDjFupoVzE&hl=en_US" width="640" height="480"></iframe> -->
 
-
+<div class="container">
 <h2 class="lead"> Top listings in  {{nbd}}: </h2>
 
+<div class="lead">
 <table class="table table-hover">
 <tr><th>Price</th><th>Listing Title</th><th>Room Type</th></tr>
 {% for birth in births %}
 <tr>
   <td>{{ birth['price'] }}</td>
-  <td><a href = "{{ birth['url'] }}"> {{ birth['city']}} <a></td>
+  <!-- <td><a href = "{{ birth['url'] }}"> {{ birth['city']}} <a></td> -->
+  <td><a href = "/listing?listing_id={{ birth['id'] }}"> {{ birth['city']}} <a></td>
+
   <td> {{ birth['room_type'] }}</td>
 </tr>
 {% endfor %}
 </table>
-
+</div>
+</div>
 
 <div class='bokeh', style = float:right>
 {{ div|safe }}
 </div>
-
+</div>
 
 <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
 <script src="static/js/bootstrap.min.js"></script>

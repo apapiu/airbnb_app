@@ -14,6 +14,7 @@ from flask import request
 from flaskexample import app
 from flaskexample import airbnb_pipeline
 
+
 import psycopg2
 from sqlalchemy import create_engine
 from sqlalchemy_utils import database_exists, create_database
@@ -37,8 +38,11 @@ else:
 
 
 train = pd.read_sql_query("SELECT * FROM location_descriptions", con)
-listings = pd.read_sql_query("SELECT price, diff, listing_url, name FROM listings_price", con)
+listings = pd.read_sql_query("SELECT id, price, diff, listing_url, name, preds FROM listings_price", con)
 
+listings.id[1]
+
+listings.id[0]
 
 nbd_counts = train["neighbourhood_cleansed"].value_counts()
 descp = train[["id", "neighborhood_overview"]]
@@ -120,10 +124,12 @@ def return_map():
 #~~~~~~~~~~~~~~~~~~~
 
 @app.route('/nbd')
-def cesareans_output():
+def nbd():
     #pull 'nbd' from input field and store it:
     nbd = request.args.get('nbd')
     room_type = "Private room"
+
+    #nbd = "East Village"
 
     #nbd = "East Village"
     train = pd.read_sql_query("""
@@ -142,6 +148,7 @@ def cesareans_output():
     for i in range(0,10):
        births.append(dict(price=train.iloc[i]['price'],
                           city=train.iloc[i]['name'],
+                          id = train.index[i],
                           room_type=train.iloc[i]['diff'],
                           url=train.iloc[i]['listing_url']))
        the_result = ''
@@ -182,3 +189,26 @@ def nbd_rec():
         nbd_score_list.append(dict(name = nbd_score.index[i], score = nbd_score.iloc[i]))
 
     return render_template('nbd_rec.html', nbds = nbd_score_list, descp = descp)
+
+
+@app.route('/listing')
+def listing():
+
+    listing_id = int(request.args.get('listing_id'))
+    #listing_id = 685006
+    #one_listing = listings.iloc[0]
+
+    one_listing = listings[listings["id"] == listing_id].iloc[0]
+
+
+    text = ("Title: {3}. The predicted price for this listing is {0} which is {1} from the actual price {2}"
+                      .format(np.round(one_listing.preds, 2),
+                              np.round(one_listing["diff"], 2),
+                              np.round(one_listing.price, 2),
+                              one_listing["name"]))
+
+    plot = airbnb_pipeline.get_price_plot(one_listing = one_listing, std = 50)
+    script, div = components(plot)
+
+    return render_template('listing_view.html', script = script, div = div,
+                           text = text, link = one_listing.listing_url)

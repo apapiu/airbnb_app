@@ -80,10 +80,7 @@ temp = nbd_score["weighted_score"].dropna().sort_values().tail(12)
 #temp.index[9]
 
 nbd_score["weighted_score"].dropna().sort_values().tail(12).index[0]
-
 nbd_score["weighted_score"].dropna().sort_values().tail(12).plot(kind = "barh")
-
-
 nbd_score["weighted_score"].dropna().sort_values().tail(12)
 
 

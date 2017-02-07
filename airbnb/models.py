@@ -105,7 +105,6 @@ if sys.platform == "linux":
     connect_str = "dbname='%s' user='%s' host='localhost' password='%s'"%(dbname,username,password)
     con = psycopg2.connect(connect_str)
     engine = create_engine('postgres://%s@localhost/%s'%(username,dbname, password))
-
 else:
     con = psycopg2.connect(database = dbname, user = username)
     engine = create_engine('postgres://%s@localhost/%s'%(username,dbname))
@@ -149,6 +148,12 @@ train_num_cat = train[["neighbourhood_cleansed",
                        "number_of_reviews",
                        "minimum_nights"]]
 
+# train_num_cat["price"] = train["price"]
+# train_num_cat = train_num_cat.dropna()
+# train_num_cat.to_csv("aibnb_for_R.csv")
+
+
+
 X_full = extract_features_price_model(train)
 
 
@@ -158,13 +163,21 @@ X_tr, X_val, y_tr, y_val = train_test_split(X_full, y, random_state = 3)
 always_mean_preds = len(y_val)*[y_tr.mean()]
 rmse(always_mean_preds, y_val)
 
+from sklearn import metrics
+
+metrics.mean_absolute_error(always_mean_preds, y_val)
+
 
 
 model = Ridge()
 #model = RandomForestRegressor(n_estimators = 50)
-#model = xgb.XGBRegressor(learning_rate = 0.1, max_depth = 6, n_estimators = 150)
+model = xgb.XGBRegressor(learning_rate = 0.1, max_depth = 6, n_estimators = 150)
 
 validate_model(model = model, data = X_full, y = y)
+
+metrics.mean_absolute_error(model.predict(X_val), y_val)
+
+
 
 #predicting:
 train["preds"] = model.predict(X_full)
@@ -223,5 +236,8 @@ rmse(preds_ensemble, y_val)
 
 #import pandas
 #import matplotlib.pyplot as plt
-#(pd.Series([90.4, 53, 50.5], index = ["Baseline", "Ridge Regression", "Random Forest"]).sort_values()
-#.plot(kind = "barh", title = "Root Mean Squared Error in Dollars on Test Set (smaller is better)"))
+# %matplotlib inline
+# import seaborn
+# import pandas as pd
+# (pd.Series([66, 36, 31], index = ["Mean Prediction", "Ridge Regression", "xgboost+Neural Net"]).sort_values()
+# .plot(kind = "barh", title = "Mean Absolute Error in Dollars on Test Set (smaller is better)"))

@@ -32,6 +32,9 @@ from sqlalchemy import create_engine
 from sqlalchemy_utils import database_exists, create_database
 import psycopg2
 
+import matplotlib.mlab as mlab
+from bokeh.plotting import figure, output_file, show
+
 
 def small_clean(train):
     columns_to_keep = ["price", "city", "neighbourhood_cleansed", "room_type",
@@ -140,10 +143,20 @@ def get_heat_map(descp, knn, model, train):
                                          gradient = return_color_scale(1),
                                          name = descp))
 
+
     for i in range(10):
-            folium.Marker([results.iloc[i].latitude, results.iloc[i].longitude],
-                          popup=results.iloc[i].neighborhood_overview,
-                          icon=folium.Icon(color='black',icon='glyphicon-home')).add_to(map_osm)
+
+        html = """<h1> <a href = '/listing?listing_id={0}'> View more info </a>
+                  bla bla bla</h1>
+                  <h1> <a href = 'www.airbnb.com'> View more info </a>
+                            bla bla bla</h1>
+               """.format(results.iloc[i].id)
+        iframe = folium.element.IFrame(html=html, width=500, height=300)
+        popup = folium.Popup(iframe, max_width=2650)
+
+        folium.Marker([results.iloc[i].latitude, results.iloc[i].longitude],
+                      popup=popup,
+                      icon=folium.Icon(color='black',icon='glyphicon-home')).add_to(map_osm)
 
     return map_osm
 
@@ -241,3 +254,25 @@ def validate_model(model, data, y):
     X_tr, X_val, y_tr, y_val = train_test_split(data, y, random_state = 3)
     preds = model.fit(X_tr, y_tr).predict(X_val)
     return rmse(preds_1, y_val)
+
+
+
+
+
+#PLOT STUFF:
+
+def get_normal_pdf(mu, sigma):
+    x = np.linspace(mu-3*sigma, mu+3*sigma, 100)
+    dist = mlab.normpdf(x, mu, sigma)
+    return (x, dist)
+
+def get_price_plot(one_listing, std = 50):
+    x, dist = get_normal_pdf(one_listing.preds, std)
+
+    p = figure(title="Price Distribution for Similar Listings. Red line is actual price.",
+               plot_width=600, plot_height=300)
+
+    p.line(x,dist)
+    p.ray(x=[one_listing.price], y=[0], length=0, angle=np.pi/2, line_width=2, color = "red")
+
+    return(p)
