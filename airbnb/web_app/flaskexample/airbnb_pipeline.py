@@ -257,8 +257,6 @@ def validate_model(model, data, y):
 
 
 
-
-
 #PLOT STUFF:
 
 def get_normal_pdf(mu, sigma):

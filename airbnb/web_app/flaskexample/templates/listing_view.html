@@ -60,14 +60,26 @@
     </nav>
 
     <div class = 'container'>
+
+
     <br><br><br>
-    <div class = 'lead'> {{text}} </div>
+    <h2> {{title}} </h2>
+
     <b><div class = 'lead'> <a href = {{link}}> View on Airbnb </a> </div></b>
 
 
-    <div class='bokeh', style = float:left>
-    {{ div|safe }}
-    </div>
+        <div class='bokeh', style = float:right>
+        {{ div|safe }}
+        </div>
+
+    <div class = 'lead'> {{text}} </div>
+
+
+    <div class = 'lead'> Listing Description: <br> {{summary}} </div>
+    <img src={{photo_link}}>
+
+
+
   </div>
 
   </body>

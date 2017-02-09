@@ -15,6 +15,7 @@ from flaskexample import app
 from flaskexample import airbnb_pipeline
 
 
+
 import psycopg2
 from sqlalchemy import create_engine
 from sqlalchemy_utils import database_exists, create_database
@@ -38,11 +39,9 @@ else:
 
 
 train = pd.read_sql_query("SELECT * FROM location_descriptions", con)
-listings = pd.read_sql_query("SELECT id, price, diff, listing_url, name, preds FROM listings_price", con)
-
-listings.id[1]
-
-listings.id[0]
+listings = pd.read_sql_query("""
+                             SELECT id, price, diff, listing_url, name, summary, preds, medium_url FROM listings_price
+                             """, con)
 
 nbd_counts = train["neighbourhood_cleansed"].value_counts()
 descp = train[["id", "neighborhood_overview"]]
@@ -154,7 +153,7 @@ def nbd():
        the_result = ''
 
 
-    plot = Histogram(train["price"], bins = 20)
+    plot = Histogram(train["price"], bins = 20, plot_width=500, plot_height=300)
     script, div = components(plot)
     title = "Distribution of daily prices in {0}".format(nbd)
 
@@ -184,9 +183,13 @@ def nbd_rec():
 
     nbd_score = nbd_score["weighted_score"].dropna().sort_values(ascending = False).head(10)
 
+    nbd_score = np.sqrt(np.sqrt(np.sqrt(nbd_score/np.max(nbd_score))))*95
+
+
+
     nbd_score_list = []
     for i in range(10):
-        nbd_score_list.append(dict(name = nbd_score.index[i], score = nbd_score.iloc[i]))
+        nbd_score_list.append(dict(name = nbd_score.index[i], score = int(nbd_score.iloc[i])))
 
     return render_template('nbd_rec.html', nbds = nbd_score_list, descp = descp)
 
@@ -198,17 +201,27 @@ def listing():
     #listing_id = 685006
     #one_listing = listings.iloc[0]
 
+
     one_listing = listings[listings["id"] == listing_id].iloc[0]
 
 
-    text = ("Title: {3}. The predicted price for this listing is {0} which is {1} from the actual price {2}"
-                      .format(np.round(one_listing.preds, 2),
-                              np.round(one_listing["diff"], 2),
-                              np.round(one_listing.price, 2),
-                              one_listing["name"]))
 
-    plot = airbnb_pipeline.get_price_plot(one_listing = one_listing, std = 50)
+    title = one_listing["name"]
+    summary = one_listing["summary"]
+    text = ("The predicted daily price for this listing is {0}$ which is {1}$ from the actual price {2}$"
+                      .format(int(one_listing.preds),
+                              int(one_listing["diff"]),
+                              int(one_listing.price)))
+    photo_link = one_listing["medium_url"]
+
+    plot = airbnb_pipeline.get_price_plot(one_listing = one_listing, std = 35)
     script, div = components(plot)
 
-    return render_template('listing_view.html', script = script, div = div,
-                           text = text, link = one_listing.listing_url)
+    return render_template('listing_view.html', script = script, div = div, summary = summary,
+                           text = text, link = one_listing.listing_url, title = title, photo_link = photo_link)
+
+
+
+@app.route('/description')
+def description():
+    return render_template('description.html')

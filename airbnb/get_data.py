@@ -80,7 +80,7 @@ location_descriptions.to_sql('location_descriptions', engine, if_exists = 'repla
 
 #mock listings for testing:
 clean_data[:10].to_sql('mock_listings', engine, if_exists='replace', index=True)
-clean_data[:10].to_csv('mock_clean_data.csv', )
+clean_data[:10].to_csv('mock_clean_data.csv')
 
 
 

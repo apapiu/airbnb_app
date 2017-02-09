@@ -37,10 +37,15 @@
               </div>
 
             </form> -->
-            <label for="nbd" class="lead">Your current desctiption is: {{descp}} <br><br>
-                      Below you will find your top recommended neighborhoods - click on them to see the best listings.
-                      You can also look at the heat-map below to see what general areas of the city have the vibe you
-                      are looking for.</label>
+            <label for="nbd" class="lead">
+                      Your current desctiption is: {{descp}} <br><br>
+
+                      Above you will see a heat-map allowing you to explore what general areas of the city have the vibe you
+                      are looking for. <br><br>
+
+
+                      Below you will find your top recommended neighborhoods - click on them to see top listings in each neighborhood.
+                      </label>
       <br>
 
       <br>
@@ -55,7 +60,7 @@
       <div class="lead">
 
     <table class="table table-hover">
-    <tr><th>City</th><th>Score</th>
+    <tr><th>Neighborhood</th><th>Match Score</th>
     {% for nbd in nbds %}
 
     <form  action="/nbd?nbd=East+Village" method="GET">
@@ -63,7 +68,7 @@
 
       <a href="/nbd?nbd={{ nbd['name'] }}" > {{ nbd['name'] }}</button>
 
-    </td><td>{{ nbd['score']}}</td></tr>
+    </td><td>{{ nbd['score']}}%</td></tr>
     </form>
     {% endfor %}
     </table>

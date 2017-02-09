@@ -65,9 +65,17 @@
 <br><br>
 
 <div class="container">
+
+    <div class='bokeh', style = float:right>
+    <br>
+    {{ div|safe }}
+    </div>
       <div class="starter-template">
         <h2>{{title}}</h2>
         <h3 class="lead">{{more_info}}</h3>
+        <h3 class="lead">Below you will find the top listings in the neighborhood. These are the listings that our price model
+        thinks are good deals. Click on them for more info!</h3>
+
       </div>
 <!--
     <div class="container">
@@ -101,7 +109,9 @@
       <!-- <iframe src="https://www.google.com/maps/d/embed?mid=1TC3HMjBX0G_ObfCt7uDjFupoVzE&hl=en_US" width="640" height="480"></iframe> -->
 
 <div class="container">
-<h2 class="lead"> Top listings in  {{nbd}}: </h2>
+
+
+<h2> Top listings in  {{nbd}}: </h2>
 
 <div class="lead">
 <table class="table table-hover">
@@ -119,9 +129,6 @@
 </div>
 </div>
 
-<div class='bokeh', style = float:right>
-{{ div|safe }}
-</div>
 </div>
 
 <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
