@@ -39,14 +39,22 @@ else:
 
 
 train = pd.read_sql_query("SELECT * FROM location_descriptions", con)
-listings = pd.read_sql_query("""
-                             SELECT id, price, diff, listing_url, name, summary, preds, medium_url FROM listings_price
-                             """, con)
+train["id"] = train["id"].astype("float").astype("int")
+
+
+listings = pd.read_sql_query(
+            """
+            SELECT id, price, diff, neighbourhood_cleansed,listing_url,
+            name, summary, preds, medium_url FROM listings_price
+            """, con)
+
+train = train.merge(listings)
 
 nbd_counts = train["neighbourhood_cleansed"].value_counts()
 descp = train[["id", "neighborhood_overview"]]
 descp = descp.drop_duplicates()
 
+nbds = list(nbd_counts[:40].index)
 
 print("loading models")
 model = joblib.load(os.path.join(home_folder, 'airbnb_app/Data/tf_idf_model.pkl'))
@@ -79,7 +87,7 @@ knn.fit(X_proj)
 @app.route('/')
 @app.route('/home')
 def map_input():
-    return render_template("home.html")
+    return render_template("home.html", nbds = nbds)
 
 
 @app.route('/map')
@@ -128,9 +136,9 @@ def nbd():
     nbd = request.args.get('nbd')
     room_type = "Private room"
 
-    #nbd = "East Village"
 
     #nbd = "East Village"
+
     train = pd.read_sql_query("""
                            SELECT * FROM listings_price
                            WHERE neighbourhood_cleansed = %(nbd)s
@@ -144,7 +152,7 @@ def nbd():
 
     births = []
     #showing some tables:
-    for i in range(0,10):
+    for i in range(0,25):
        births.append(dict(price=train.iloc[i]['price'],
                           city=train.iloc[i]['name'],
                           id = train.index[i],
@@ -224,4 +232,10 @@ def listing():
 
 @app.route('/description')
 def description():
-    return render_template('description.html')
+    return render_template('description_2.html')
+
+
+
+@app.route('/about_me')
+def about_me():
+    return render_template('about_me.html')

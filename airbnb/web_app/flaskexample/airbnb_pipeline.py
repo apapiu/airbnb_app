@@ -146,13 +146,17 @@ def get_heat_map(descp, knn, model, train):
 
     for i in range(10):
 
-        html = """<h1> <a href = '/listing?listing_id={0}'> View more info </a>
-                  bla bla bla</h1>
-                  <h1> <a href = 'www.airbnb.com'> View more info </a>
-                            bla bla bla</h1>
-               """.format(results.iloc[i].id)
-        iframe = folium.element.IFrame(html=html, width=500, height=300)
-        popup = folium.Popup(iframe, max_width=2650)
+        html = """<h3 class = "lead"> Title: {0}  </h3> <br>
+                       Airbnb Link: {3} <br><br>
+                       Summary: {1} <br><br>
+                       Price: {2}
+
+               """.format(results.name.iloc[i], results.summary.iloc[i],
+                          results.price.iloc[i], results.listing_url.iloc[i])
+        iframe = folium.element.IFrame(html=html, width=300, height=300)
+        popup = folium.Popup(iframe, max_width=1200)
+
+
 
         folium.Marker([results.iloc[i].latitude, results.iloc[i].longitude],
                       popup=popup,

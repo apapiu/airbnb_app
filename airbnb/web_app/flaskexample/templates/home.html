@@ -4,14 +4,14 @@
 
 <br><br>
 
-<div class="bullshit">
+<div class="container_2">
 
-    <div class="bullshit">
+    <div class="container_2">
         <!-- <h1>BestBnB</h1> -->
         <h2 style>Welcome to BestBnB, the app that helps you get a fairly priced AirBnb in a neighborhood you'll love  </h2>
       </div>
 
-    <div class = "bullshit">
+    <div class = "container_2">
 
       <form  action="/nbd_rec" method="GET">
         <div class="form-group">
@@ -63,11 +63,20 @@
 
             </form> -->
 
-      <br><br>
+      <br><br><br>
       <form  action="/nbd" method="GET">
         <div class="form-group">
           <label for="nbd" class="lead" >Or see best listings in a specific neighborhood:</label> <br>
-          <input type="text" class="form-control" id="nbd" name='nbd' placeholder="e.g. East Village">
+          <!-- <input type="text" class="form-control" id="nbd" name='nbd' placeholder="e.g. East Village"> -->
+
+          <div class="form-group">
+            <select class="form-control" id="sel1" name='nbd' width="300px">
+              {% for nbd in nbds %}
+              <option>{{nbd}}</option>
+              {% endfor %}
+            </select>
+              <input class="button1" type="submit" value="Select">
+</div>
 
 
         </div>
