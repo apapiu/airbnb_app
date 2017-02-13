@@ -35,7 +35,7 @@ Every descrption is vectorized using bigram TF-IDF and then projected onto a 100
 
 
 
-For the price model I went with gradient boosting regression with xgboost since it performed significantly faster than Ridge Regression and handles missing values gracefully. The improvement is, from what I can tell, mostly due to the fact that some features like latitude and longitude vary nonlinearly with respect to price.
+For the price model I went with gradient boosting regression with xgboost since it performed significantly better than Ridge Regression and handles missing values gracefully. The improvement is, from what I can tell, mostly due to the fact that some features like latitude and longitude vary nonlinearly with respect to price.
 
 ![](/airbnb/web_app/flaskexample/static/images/2.png)
 
