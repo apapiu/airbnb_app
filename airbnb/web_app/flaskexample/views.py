@@ -41,18 +41,17 @@ else:
 train = pd.read_sql_query("SELECT * FROM location_descriptions", con)
 train["id"] = train["id"].astype("float").astype("int")
 
-#eliminate SF for now.
-train = train[train.city.isin(['New York', 'Brooklyn', 'Queens', 'Bronx', 'Brooklyn ',
-       'Astoria', 'Staten Island', 'Long Island City', 'Flushing'])]
 
 listings = pd.read_sql_query(
             """
             SELECT id, price, diff, neighbourhood_cleansed,listing_url,
-            name, summary, preds, medium_url, city FROM listings_price
+            name, summary, preds, medium_url, city, room_type FROM listings_price
             """, con)
 
 train = train.merge(listings)
 
+
+train = train[train.price > 25]
 
 nbd_counts = train["neighbourhood_cleansed"].value_counts()
 descp = train[["id", "neighborhood_overview"]]
@@ -195,7 +194,8 @@ def nbd_rec():
                                 model = model, train = train, nbd_counts = nbd_counts)
 
 
-    nbd_score = nbd_score["weighted_score"].replace(np.inf, np.nan).dropna().sort_values(ascending = False).head(10)
+    nbd_score = (nbd_score["weighted_score"].replace(np.inf, np.nan).dropna().
+                sort_values(ascending = False).head(10))
 
     nbd_score = np.sqrt(np.sqrt(np.sqrt(nbd_score/np.max(nbd_score))))*95
 
