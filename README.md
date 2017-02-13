@@ -48,7 +48,7 @@ Ensembling with a neural net helps a bit but not enough to warrant the hassle in
 
 ###Acknowledgements:
 
-A big thank you to everyone at Insight especially the program directors and my fellow fellows for being so cool and helpful. Also thaks to Murray Cox for scrapign the AirBnB data and to all the great people who contributed to all the open source packages I used for this project.
+A big thank you to everyone at Insight especially the program directors and my fellow fellows for being so cool and helpful. Also thaks to Murray Cox for scraping the AirBnB data and to all the great people who contributed to all the open source packages I used for this project.
 
 
 
