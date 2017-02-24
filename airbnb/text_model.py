@@ -16,6 +16,7 @@ from sklearn.cross_validation import train_test_split
 import airbnb_pipeline
 
 
+
 from sklearn.externals import joblib
 from sqlalchemy import create_engine
 from sqlalchemy_utils import database_exists, create_database
@@ -42,6 +43,7 @@ nbd_counts = train["neighbourhood_cleansed"].value_counts()
 
 descp = train[["id", "neighborhood_overview"]]
 descp.neighborhood_overview.value_counts()
+
 descp.shape
 #still some duplicates here...
 descp.drop_duplicates(subset = ["neighborhood_overview"]).shape
@@ -109,7 +111,6 @@ nbd_score.dropna()["weighted_score"].sort_values().tail(12).plot(kind = "barh")
 popular_nbds = nbd_counts.index[:50]
 
 sm_train = train[train.neighbourhood_cleansed.isin(popular_nbds)]
-
 sm_train.neighborhood_overview
 
 
@@ -117,9 +118,11 @@ sm_train.neighbourhood_cleansed = sm_train.neighbourhood_cleansed.str.lower()
 sm_train.neighborhood_overview = sm_train.neighborhood_overview.str.lower()
 
 
+
 #eliminating nbd names from listings so no data leakage occurs.
 for nbd in popular_nbds:
     sm_train.neighborhood_overview = sm_train.neighborhood_overview.str.replace(nbd.lower(), "")
+
 
 
 
@@ -135,6 +138,7 @@ y_nbd
 
 
 
+
 target_enc = LabelEncoder()
 y = target_enc.fit_transform(y_nbd)
 
@@ -143,9 +147,8 @@ y = target_enc.fit_transform(y_nbd)
 
 #.11% accuracy
 
-
-model = make_pipeline(CountVectorizer(stop_words = "english", min_df = 10, max_df = 0.2,
-                                      ngram_range = (1, 1)),
+words
+model = make_pipeline(CountVectorizer(min_df = 10, max_df = 0.2, ngram_range = (1, 1)),
                       #TruncatedSVD(300),
                       #StandardScaler(),
                       LogisticRegression(C = 0.7))
@@ -158,13 +161,14 @@ model = make_pipeline(CountVectorizer(stop_words = "english", min_df = 10, max_d
 #                       KNeighborsClassifier(100, metrics = "cosine", algorithm = "brute"))
 #
 
-vect = TfidfVectorizer(stop_words = "english", min_df = 30, max_df = 0.05, lowercase = False,
-                                      ngram_range = (1,2))
+vect = CountVectorizer(min_df = 10, max_df = 0.2, ngram_range = (1, 1))
 
 vect.fit(X)
 
 
-vect.get_feature_names()
+
+len(vect.get_feature_names())
+
 
 
 
@@ -184,8 +188,6 @@ model.score(X_val, y_val)
 preds = pd.Series(model.predict_proba(X_val[:100])[0], index = target_enc.classes_)
 preds.sort_values(ascending = False)[:10]
 
-
-X.apply(lambda x: len(x.split())).hist()
 from sklearn import metrics
 
 
@@ -193,6 +195,7 @@ from sklearn import metrics
 
 preds = pd.Series(model.predict_proba(["trees"])[0], index = target_enc.classes_)
 preds.sort_values(ascending = False)[:10]
+
 
 preds = pd.Series(model.predict_proba(["hip cool trendy"])[0], index = target_enc.classes_)
 preds.sort_values(ascending = False)[:10]
@@ -212,29 +215,52 @@ vect = model.named_steps["countvectorizer"]
 logit = model.named_steps["logisticregression"]
 
 feat_names = vect.get_feature_names()
-
-
 feat_names
+
+
 
 coefs = logit.coef_
 
+classes
 
 
 classes = target_enc.classes_
-ind = np.argwhere(classes == "east village")[0][0]
+ind = np.argwhere(classes == "Williamsburg")[0][0]
+
+
 coefs_one_class = pd.Series(coefs[ind], index = vect.get_feature_names())
 coefs_one_class.sort_values(ascending = False)[:30]
 
 
+#####
+#Eliminating proper nouns
+#####
+from nltk.corpus import stopwords
 
-#tagging:
-import nltk
-from nltk.tag import pos_tag
-pos_tag(["Alex"])
+X.shape
+
+popular_nbds
+X_new = X.str.replace("[^\w\s]", "")
+
+txt = ""
+for i in X_new:
+    txt = txt + i
+
+txt = txt.split()
+txt = pd.Series(txt)
 
 
-pos_tag([feat_names[100]])
+word_count = txt.value_counts()
 
-[pos_tag([i]) for i in feat_names]
 
-text = "Obama delivers his first speech."
+#eliminate stop words, word_count,
+word_count = word_count[~word_count.index.isin(stopwords.words('english'))]
+word_count = word_count[word_count > 20]
+word_count = word_count[word_count.index.str.islower()]
+
+
+word_count
+
+words = word_count.index
+
+len(words)

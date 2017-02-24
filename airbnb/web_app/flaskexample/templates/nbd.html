@@ -112,14 +112,14 @@
 
 <div class="lead">
 <table class="table table-hover">
-<tr><th>Price</th><th>Listing Title</th><th>Room Type</th></tr>
+<tr><th>Price</th><th>Listing Title</th><th>Value</th></tr>
 {% for birth in births %}
 <tr>
-  <td>{{ birth['price'] }}</td>
+  <td>${{ birth['price'] }}</td>
   <!-- <td><a href = "{{ birth['url'] }}"> {{ birth['city']}} <a></td> -->
   <td><a href = "/listing?listing_id={{ birth['id'] }}"> {{ birth['city']}} <a></td>
 
-  <td> {{ birth['room_type'] }}</td>
+  <td>${{ birth['room_type'] }}</td>
 </tr>
 {% endfor %}
 </table>

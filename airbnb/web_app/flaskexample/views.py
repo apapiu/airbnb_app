@@ -38,6 +38,7 @@ else:
     con = psycopg2.connect(database = dbname, user = username)
 
 
+
 train = pd.read_sql_query("SELECT * FROM location_descriptions", con)
 train["id"] = train["id"].astype("float").astype("int")
 
@@ -50,8 +51,21 @@ listings = pd.read_sql_query(
 
 train = train.merge(listings)
 
+#visualaizing preds.
+# %matplotlib inline
+# import seaborn as sns
+# #doing the ratio thing:
+# temp = train[train["room_type"] == "Private room"][train["price"] < 200][["preds", "price"]]
+# #%config InlineBackend.figure_format = 'retina'
+#
+#
+# temp["ratio"] = (temp["preds"] - temp["price"])/temp["price"]
+# temp["good"] = 0
+# temp["good"][temp["ratio"] < 0] = 1
+# temp["good"][temp["ratio"] > 0][temp["ratio"] < 0.6] = 2
+# temp.loc[(temp["ratio"] > 0) & (temp["ratio"] < 0.6), "good"] = 2
+# sns.lmplot(x = "price", y = "preds", data = temp, hue = "good", fit_reg = False, palette = "Dark2")
 
-train = train[train.price > 25]
 
 nbd_counts = train["neighbourhood_cleansed"].value_counts()
 descp = train[["id", "neighborhood_overview"]]
@@ -152,19 +166,33 @@ def nbd():
                            params = {"nbd":nbd, "room_type":room_type})
 
 
-    train = train.sort_values("diff", ascending = False)
+    #train
 
+    train["ratio"] = (train["preds"] - train["price"])/train["price"]
+
+
+
+
+    #keep train for the histogram
+    sm_train = train[train["ratio"] > 0][train["ratio"] < 1.2]
+    sm_train = sm_train.sort_values("diff", ascending = False)
+
+
+    sm_train["diff"]
     births = []
+
+
     #showing some tables:
     for i in range(0,25):
-       births.append(dict(price=train.iloc[i]['price'],
-                          city=train.iloc[i]['name'],
-                          id = train.index[i],
-                          room_type=train.iloc[i]['diff'],
-                          url=train.iloc[i]['listing_url']))
+       births.append(dict(price=int(sm_train.iloc[i]['price']),
+                          city=sm_train.iloc[i]['name'],
+                          id = sm_train.index[i],
+                          room_type=int(sm_train.iloc[i]['preds']),
+                          url=sm_train.iloc[i]['listing_url']))
        the_result = ''
 
 
+    #births
     plot = Histogram(train["price"], bins = 20, plot_width=500, plot_height=300)
     script, div = components(plot)
     title = "Distribution of daily prices in {0}".format(nbd)
